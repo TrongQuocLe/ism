@@ -6,12 +6,12 @@ try {
 } catch (Exception $e) {
     mysql_fatal_error();
 }
+if (isset($_POST['buy'])) {
+    customer_order($conn, $_POST['customer_id'], $_POST['product_id'], $_POST['quantity'], $_POST['price']);
+}
 $products = get_all_products($conn);
-// $customers = get_all_customers($conn);
-// if (isset($_POST['submit'])) {
-//     customer_order($conn, $_POST['customer_id'], $_POST['product_id'], $_POST['quantity']);
-// }
-
+$customers = get_all_customers($conn);
+$promotions_for_unsold_products_in_last_three_months = get_promotions_for_unsold_products_in_last_three_months($conn);
 $conn->close();
 ?>
 
@@ -126,7 +126,9 @@ $conn->close();
             <input type="text" id="product_id" name="product_id" required>
             <label for="quantity">Quantity:</label>
             <input type="number" id="quantity" name="quantity" min="0" required>
-            <button type="submit" name="submit">Submit</button>
+            <label for="price">Price:</label>
+            <input type="number" id="price" step="0.01" name="price" required>
+            <button type="submit" name="buy">Submit</button>
         </form>
     </div>
 

@@ -417,14 +417,17 @@ function get_all_customers($conn)
     }
     return $customers;
 }
-function customer_order($conn, $customer_id, $product_id, $quantity)
+function customer_order($conn, $customer_id, $product_id, $quantity, $price)
 {
+    $quantity = (int)$quantity;
+    $price = (float)$price;
+    $sale_gross = $price * $quantity;
     $query = 
-        "INSERT INTO sales (customer_id, product_id, order_quantity)
-        VALUES (?, ?, ?)";
+        "INSERT INTO sales (customer_id, product_id, sale_quantity, sale_date, sale_gross)
+        VALUES (?, ?, ?, CURDATE(), ?)";
     try {
         $stmt = $conn->prepare($query);
-        $stmt->bind_param('iis', $customer_id, $product_id, $quantity);
+        $stmt->bind_param('iiid', $customer_id, $product_id, $quantity, $sale_gross);
         $stmt->execute();
         $stmt->close();
     } catch (Exception $e) {
