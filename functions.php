@@ -264,7 +264,7 @@ function get_total_gross_sales_monthly($conn)
         SUM(sale_gross) AS month_total_sales
         FROM sales
         GROUP BY month
-        ORDER BY month;
+        ORDER BY sale_date;
         ";
     // $query =
     //     "SELECT 
