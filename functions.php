@@ -205,7 +205,6 @@ function update_product_quantity($conn, $product_id, $quantity)
     $product_id = (int)$product_id;
     $query = "UPDATE products SET product_quantity = ? WHERE product_id = ?;";
     try {
-        echo 11112312312312312312312312;
         $stmt = $conn->prepare($query);
         $stmt->bind_param('ii', $quantity, $product_id);
         $stmt->execute();
@@ -379,60 +378,109 @@ function get_profit_margin_percentage_by_product($conn)
     return $profit_margin_by_product;
 }
 
-function sale_difference($conn, $month, $year, $prev_month, $prev_year)
-{
-    $month = filter_var(value: $month, filter: FILTER_VALIDATE_INT);
-    $year = filter_var(value: $year, filter: FILTER_VALIDATE_INT);
-    $prev_month = filter_var(value: $prev_month, filter: FILTER_VALIDATE_INT);
-    $prev_year = filter_var(value: $prev_year, filter: FILTER_VALIDATE_INT);
-    $query =
-        "SELECT 
-        (SELECT SUM(sale_gross) 
-        FROM sales 
-        WHERE MONTH(sale_date) = ? AND YEAR(sale_date) = ?)
-        - 
-        (SELECT SUM(sale_gross) 
-        FROM sales 
-        WHERE MONTH(sale_date) = ? AND YEAR(sale_date) = ?) 
 
-        AS sales_difference";
+// Customer
+function get_all_products($conn)
+{
+    $query = 
+        "SELECT 
+            product_id,
+            product_name,
+            product_description,
+            product_quantity,
+            product_cost,
+            product_price,
+            vendor_id
+        FROM products";
+    try {
+        $result = $conn->query($query);
+        $products = $result->fetch_all(MYSQLI_ASSOC);
+        $result->close();
+    } catch (Exception $e) {
+        mysql_fatal_error();
+    }
+    return $products;
+}
+function get_all_customers($conn)
+{
+    $query = 
+        "SELECT 
+            customer_id,
+            customer_name
+        FROM customers";
+    try {
+        $result = $conn->query($query);
+        $customers = $result->fetch_all(MYSQLI_ASSOC);
+        $result->close();
+    } catch (Exception $e) {
+        mysql_fatal_error();
+    }
+    return $customers;
+}
+function customer_order($conn, $customer_id, $product_id, $quantity)
+{
+    $query = 
+        "INSERT INTO sales (customer_id, product_id, order_quantity)
+        VALUES (?, ?, ?)";
     try {
         $stmt = $conn->prepare($query);
-        $stmt->bind_param('iiii', $month, $year, $prev_month, $prev_year);
+        $stmt->bind_param('iis', $customer_id, $product_id, $quantity);
         $stmt->execute();
-        $result = $stmt->get_result();
-        $sales_difference_result = $result->fetch_assoc();
-        $result->close();
         $stmt->close();
     } catch (Exception $e) {
         mysql_fatal_error();
     }
-    return $sales_difference_result['sales_difference'];
 }
 
-
-function get_sales_per_month_in_year($conn, $year)
+// Vendor
+function get_all_orders($conn)
 {
-    $year = filter_var(value: $year, filter: FILTER_VALIDATE_INT);
-    $query =
+    $query = 
         "SELECT 
-        MONTH(sale_date) AS month, 
-        SUM(sale_gross) AS sales 
-        FROM sales 
-        WHERE YEAR(sale_date) = ? 
-        GROUP BY MONTH(sale_date)
-        ";
+            order_id,
+            product_id,
+            vendor_id,
+            order_quantity,
+            order_status,
+            order_date
+        FROM orders";
+    try {
+        $result = $conn->query($query);
+        $vendors = $result->fetch_all(MYSQLI_ASSOC);
+        $result->close();
+    } catch (Exception $e) {
+        mysql_fatal_error();
+    }
+    return $vendors;
+}
+function vendor_order($conn, $vendor_id, $product_id, $quantity)
+{
+    $query = 
+        "INSERT INTO orders (vendor_id, product_id, order_quantity, order_date, order_status)
+        VALUES (?, ?, ?, CURDATE(), 'Pending')";
     try {
         $stmt = $conn->prepare($query);
-        $stmt->bind_param('i', $year);
+        $stmt->bind_param('iis', $vendor_id, $product_id, $quantity);
         $stmt->execute();
-        $result = $stmt->get_result();
-        $sales_each_month = $result->fetch_all(MYSQLI_ASSOC);
-        $result->close();
         $stmt->close();
     } catch (Exception $e) {
         mysql_fatal_error();
     }
-    return $sales_each_month;
+}
+function complete_order($conn, $order_id)
+{
+    $order_id = (int)$order_id;
+    $query = 
+        "UPDATE orders
+        SET order_status = 'Completed'
+        WHERE order_id = ?";
+    try {
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('i', $order_id);
+        $stmt->execute();
+        $stmt->close();
+    } catch (Exception $e) {
+        mysql_fatal_error();
+    }
 }
 ?>

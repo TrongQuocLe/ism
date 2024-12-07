@@ -29,6 +29,7 @@ $daily_sales = get_sales_each_day_in_last_30_days($conn);
 $product_margins = get_profit_margin_percentage_by_product($conn);
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 
 <head>
