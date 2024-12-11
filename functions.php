@@ -196,23 +196,8 @@ function get_least_profitable_vendor($conn)
     return $least_profitable_vendor;
 }
 
-// 4. Trigger when the stock is less than the threshold
-
-// Set Product Quantity to show how the trigger (check stock < threshold) works
-function update_product_quantity($conn, $product_id, $quantity)
-{
-    $quantity = (int)$quantity;
-    $product_id = (int)$product_id;
-    $query = "UPDATE products SET product_quantity = ? WHERE product_id = ?;";
-    try {
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param('ii', $quantity, $product_id);
-        $stmt->execute();
-    } catch (Exception $e) {
-        mysql_fatal_error($e);
-    }
-    $stmt->close();
-}
+// 4. Trigger when the stock is less than the threshold 
+// show in recorded demo
 
 // 5. Identify items that haven’t sold in the past 3 months and come up with a sale. 
 // This sale would list such items and sell them at a discount. 
@@ -458,7 +443,7 @@ function vendor_order($conn, $vendor_id, $product_id, $quantity)
 {
     $query = 
         "INSERT INTO orders (vendor_id, product_id, order_quantity, order_date, order_status)
-        VALUES (?, ?, ?, CURDATE(), 'Completed')";
+        VALUES (?, ?, ?, CURDATE(), 'Completed');";
     try {
         $stmt = $conn->prepare($query);
         $stmt->bind_param('iis', $vendor_id, $product_id, $quantity);
@@ -467,5 +452,21 @@ function vendor_order($conn, $vendor_id, $product_id, $quantity)
     } catch (Exception $e) {
         mysql_fatal_error($e);
     }
+    add_product_quantity($conn, $product_id, $quantity);
+}
+function add_product_quantity($conn, $product_id, $added_quantity)
+{
+    $query = 
+        "UPDATE products
+        SET product_quantity = product_quantity + ?
+        WHERE product_id = ?";
+    try {
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('ii', $added_quantity, $product_id);
+        $stmt->execute();
+    } catch (Exception $e) {
+        mysql_fatal_error($e);
+    }
+    $stmt->close();
 }
 ?>
