@@ -4,13 +4,10 @@ require_once 'functions.php';
 try {
     $conn = new mysqli($hn, $un, $pw, $db);
 } catch (Exception $e) {
-    mysql_fatal_error();
+    mysql_fatal_error($e);
 }
 if (isset($_POST['order'])) {
     vendor_order($conn, $_POST['vendor_id'], $_POST['product_id'], $_POST['quantity']);
-}
-if (isset($_POST['complete'])) {
-    complete_order($conn, $_POST['order_id']);
 }
 $products = get_all_products($conn);
 $orders = get_all_orders($conn);
@@ -88,6 +85,7 @@ $conn->close();
                 <th>Description</th>
                 <th>Quantity</th>
                 <th>Cost</th>
+                <th>Min Quantity</th>
                 <th>Vendor Id</th>
             </tr>
         </thead>
@@ -99,6 +97,7 @@ $conn->close();
                     <td><?php echo htmlspecialchars($product['product_description']); ?></td>
                     <td><?php echo htmlspecialchars($product['product_quantity']); ?></td>
                     <td><?php echo htmlspecialchars($product['product_cost']); ?></td>
+                    <td><?php echo htmlspecialchars($product['product_min_quantity']); ?></td>
                     <td><?php echo htmlspecialchars($product['vendor_id']); ?></td>
                 </tr>
             <?php endforeach; ?>
@@ -138,14 +137,6 @@ $conn->close();
             <label for="quantity">Quantity</label>
             <input type="number" name="quantity" id="quantity" required>
             <button type="submit" name="order">Order</button>
-        </form>
-    </div>
-    <div class="summary">
-        <h2>Complete Order</h2>
-        <form method="POST" action="order.php">
-            <label for="order_id">Order ID</label>
-            <input type="number" name="order_id" id="order_id" required>
-            <button type="submit" name="complete">Complete</button>
         </form>
     </div>
 

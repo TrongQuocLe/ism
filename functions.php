@@ -28,7 +28,7 @@ function get_sales_for_nov_2024($conn)
         // $sales_for_nov_2024 = $result->fetch_all();
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $sales_for_nov_2024;
 }
@@ -42,7 +42,7 @@ function get_gross_sales_for_nov_2024($conn)
         $gross_sales_for_nov_2024 = ($result->fetch_all())[0][0];
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $gross_sales_for_nov_2024;
 }
@@ -69,7 +69,7 @@ function is_increase_over_nov_2023($conn)
         $is_sales_increase = ($result->fetch_all())[0][0];
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $is_sales_increase;
 }
@@ -91,7 +91,7 @@ function is_increase_over_oct_2024($conn)
         $is_sales_increase = ($result->fetch_all())[0][0];
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $is_sales_increase;
 }
@@ -115,7 +115,7 @@ function get_best_selling_product($conn)
         $best_selling_product = $result->fetch_all()[0];
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $best_selling_product;
 }
@@ -138,7 +138,7 @@ function get_worst_selling_product($conn)
         $worst_selling_product = $result->fetch_all()[0];
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $worst_selling_product;
 }
@@ -163,7 +163,7 @@ function get_most_profitable_vendor($conn)
         $most_profitable_vendor = $result->fetch_all()[0];
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $most_profitable_vendor;
 }
@@ -191,7 +191,7 @@ function get_least_profitable_vendor($conn)
 
         // $least_profitable_vendor = $conn->query($query)->fetch_assoc();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $least_profitable_vendor;
 }
@@ -224,7 +224,7 @@ function delete_last_three_month_sales($conn)
     try {
         $conn->query($query);
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
 }
 // Identify items that haven’t sold in the past 3 months and come up with a sale
@@ -247,13 +247,10 @@ function get_promotions_for_unsold_products_in_last_three_months($conn)
         $promotions = $result->fetch_all();
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $promotions;
 }
-
-
-
 
 // 6. Create a report that lists total sales per month for current year
 function get_total_gross_sales_monthly($conn)
@@ -279,7 +276,7 @@ function get_total_gross_sales_monthly($conn)
         $sales_each_month = $result->fetch_all(MYSQLI_ASSOC);
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $sales_each_month;
 }
@@ -308,7 +305,7 @@ function get_top_spending_customers($conn, $limit)
         $result->close();
         $stmt->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $top_spending_customers;
 }
@@ -333,7 +330,7 @@ function get_sales_each_day_in_last_30_days($conn)
         $result->close();
         $stmt->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $sales_each_day;
 }
@@ -352,7 +349,7 @@ function get_3_lastest_order($conn)
 
         $lastest_order = $conn->query($query)->fetch_all();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $lastest_order;
 }
@@ -373,7 +370,7 @@ function get_profit_margin_percentage_by_product($conn)
         $profit_margin_by_product = $result->fetch_all(MYSQLI_ASSOC);
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $profit_margin_by_product;
 }
@@ -390,6 +387,7 @@ function get_all_products($conn)
             product_quantity,
             product_cost,
             product_price,
+            product_min_quantity,
             vendor_id
         FROM products";
     try {
@@ -397,7 +395,7 @@ function get_all_products($conn)
         $products = $result->fetch_all(MYSQLI_ASSOC);
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $products;
 }
@@ -413,7 +411,7 @@ function get_all_customers($conn)
         $customers = $result->fetch_all(MYSQLI_ASSOC);
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $customers;
 }
@@ -431,7 +429,7 @@ function customer_order($conn, $customer_id, $product_id, $quantity, $price)
         $stmt->execute();
         $stmt->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
 }
 
@@ -452,7 +450,7 @@ function get_all_orders($conn)
         $vendors = $result->fetch_all(MYSQLI_ASSOC);
         $result->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
     return $vendors;
 }
@@ -460,30 +458,14 @@ function vendor_order($conn, $vendor_id, $product_id, $quantity)
 {
     $query = 
         "INSERT INTO orders (vendor_id, product_id, order_quantity, order_date, order_status)
-        VALUES (?, ?, ?, CURDATE(), 'Pending')";
+        VALUES (?, ?, ?, CURDATE(), 'Completed')";
     try {
         $stmt = $conn->prepare($query);
         $stmt->bind_param('iis', $vendor_id, $product_id, $quantity);
         $stmt->execute();
         $stmt->close();
     } catch (Exception $e) {
-        mysql_fatal_error();
-    }
-}
-function complete_order($conn, $order_id)
-{
-    $order_id = (int)$order_id;
-    $query = 
-        "UPDATE orders
-        SET order_status = 'Completed'
-        WHERE order_id = ?";
-    try {
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param('i', $order_id);
-        $stmt->execute();
-        $stmt->close();
-    } catch (Exception $e) {
-        mysql_fatal_error();
+        mysql_fatal_error($e);
     }
 }
 ?>

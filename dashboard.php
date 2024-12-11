@@ -8,7 +8,7 @@ require_once 'functions.php';
 try {
     $conn = new mysqli($hn, $un, $pw, $db);
 } catch (Exception $e) {
-    mysql_fatal_error();
+    mysql_fatal_error($e);
 }
 $sales_for_nov_2024 = get_sales_for_nov_2024($conn);
 $gross_sales_for_nov_2024 = get_gross_sales_for_nov_2024($conn);
@@ -18,9 +18,6 @@ $best_selling_product = get_best_selling_product($conn);
 $worst_selling_product = get_worst_selling_product($conn);
 $most_profitable_vendor = get_most_profitable_vendor($conn);
 $least_profitable_vendor = get_least_profitable_vendor($conn);
-if (isset($_POST['submit'])) {
-    update_product_quantity($conn, $_POST['product_id'], $_POST['quantity']);
-}
 $last_3_order = get_3_lastest_order($conn);
 $promotions_for_unsold_products_in_last_three_months = get_promotions_for_unsold_products_in_last_three_months($conn);
 $monthly_sales = get_total_gross_sales_monthly($conn);
@@ -127,17 +124,6 @@ $conn->close();
         <p><span>Least Profitable Vendor:</span> <?php echo htmlspecialchars($least_profitable_vendor[0]); ?>
             ($<?php echo htmlspecialchars(number_format($least_profitable_vendor[1], 2)); ?>)</p>
     </div>
-    <div class="summary">
-        <h2>Test Trigger</h2>
-        <form method="POST" action="dashboard.php">
-            <label for="product_id">Product ID:</label>
-            <input type="text" id="product_id" name="product_id" required>
-            <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity" name="quantity" min="0" required>
-            <button type="submit" name="submit">Submit</button>
-        </form>
-    </div>
-
     <h2 style="text-align: center;">3 Lastest Order</h2>
     <table>
         <thead>

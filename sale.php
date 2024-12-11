@@ -4,7 +4,7 @@ require_once 'functions.php';
 try {
     $conn = new mysqli($hn, $un, $pw, $db);
 } catch (Exception $e) {
-    mysql_fatal_error();
+    mysql_fatal_error($e);
 }
 if (isset($_POST['buy'])) {
     customer_order($conn, $_POST['customer_id'], $_POST['product_id'], $_POST['quantity'], $_POST['price']);
